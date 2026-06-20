@@ -25,10 +25,11 @@
 // =============================================================================
 // STATE
 // =============================================================================
-static unsigned long lastCheckTime  = 0;
-static unsigned long lastWaterTime  = 0;
-static unsigned long pumpStartTime  = 0;
-static bool          isPumping      = false;
+static unsigned long lastCheckTime       = 0;
+static unsigned long lastWaterTime       = 0;
+static unsigned long pumpStartTime       = 0;
+static unsigned long lastCooldownLogTime = 0;
+static bool          isPumping           = false;
 
 // =============================================================================
 // HELPERS
@@ -103,8 +104,9 @@ void loop() {
     }
   }
 
-  // 3. Periodic status log while idle
-  if (!isPumping && inCooldown && intervalDue) {
+  // 3. Periodic status log while idle — once per second during cooldown
+  if (!isPumping && inCooldown && (now - lastCooldownLogTime >= 1000UL)) {
+    lastCooldownLogTime = now;
     unsigned long remaining = COOLDOWN_MS - (now - lastWaterTime);
     Serial.print("[INFO] Cooldown active — "); Serial.print(remaining / 1000); Serial.println("s remaining");
   }
