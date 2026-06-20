@@ -58,6 +58,35 @@ void stopPump() {
 }
 
 // =============================================================================
+// STARTUP HARDWARE CHECK
+// =============================================================================
+// Pulses the pump briefly and reads the sensor so you can verify wiring via
+// Serial Monitor before the main loop begins.
+#define PUMP_TEST_MS 500   // short pulse duration — enough to hear/feel the pump
+
+void startupCheck() {
+  Serial.println("--- Hardware Check ---");
+
+  // --- Pump test ---
+  Serial.println("[CHECK] Pump: pulsing for 500 ms — listen/feel for activation...");
+  digitalWrite(PUMP_PIN, HIGH);
+  delay(PUMP_TEST_MS);
+  digitalWrite(PUMP_PIN, LOW);
+  Serial.println("[CHECK] Pump: pulse done. Did it run? If not, check MOSFET wiring and 5V rail.");
+
+  // --- Sensor test ---
+  int moisture = readMoisture();
+  Serial.print("[CHECK] Sensor ADC = "); Serial.print(moisture);
+  if (moisture < 100 || moisture > 4000) {
+    Serial.println("  <-- WARNING: value out of expected range (100–4000). Check sensor wiring.");
+  } else {
+    Serial.println("  <-- OK");
+  }
+
+  Serial.println("--- Hardware Check Done ---");
+}
+
+// =============================================================================
 // SETUP
 // =============================================================================
 void setup() {
@@ -73,6 +102,8 @@ void setup() {
   Serial.print("Check interval: "); Serial.print(CHECK_INTERVAL_MS / 1000); Serial.println("s");
   Serial.print("Cooldown      : "); Serial.print(COOLDOWN_MS / 1000); Serial.println("s");
   Serial.println("================================");
+
+  startupCheck();
 }
 
 // =============================================================================
